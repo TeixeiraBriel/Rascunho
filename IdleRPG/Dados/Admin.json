@@ -1,0 +1,10 @@
+{
+  "Id": 1,
+  "Username": "admin",
+  "Password": "admin",
+  "Nivel": 1,
+  "Vida": 10,
+  "Defesa": 2,
+  "Dano": 2,
+  "VelAtaque": 1
+}

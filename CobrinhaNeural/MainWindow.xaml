@@ -1,0 +1,22 @@
+﻿<Window x:Class="CobrinhaNeural.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:CobrinhaNeural"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+    <StackPanel>
+        <Grid x:Name="GridPai">
+        </Grid>
+
+        <TextBlock x:Name="txtDados"/>
+        <StackPanel Orientation="Horizontal">
+            <Button Content="Esquerda" Click="VirarEsquerda"/>
+            <Button Content="Direita" Click="VirarDireita"/>
+            <Button Content="Frente" Click="SeguirReto"/>
+            <Button Content="Executa Treinamento" Click="ExecutaTreinamento"/>
+            <Button Content="Executa Simulacao" Click="ExecutaSimulacao"/>
+        </StackPanel>
+    </StackPanel>
+</Window>

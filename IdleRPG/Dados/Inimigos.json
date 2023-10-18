@@ -1,0 +1,22 @@
+{
+  "ListaInimigos": [
+    {
+      "Id": 0,
+      "Nome": "Goblin",
+      "Nivel": 1,
+      "Vida": 3,
+      "Defesa": 1,
+      "Dano": 2,
+      "VelAtaque": 2
+    },
+    {
+      "Id": 0,
+      "Nome": "Ogro",
+      "Nivel": 1,
+      "Vida": 6,
+      "Defesa": 2,
+      "Dano": 1,
+      "VelAtaque": 1
+    }
+  ]
+}
