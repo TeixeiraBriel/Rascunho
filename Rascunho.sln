@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.4.33103.184
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rascunho", "Rascunho\Rascunho.csproj", "{DB661DB7-230C-4260-895F-7164DFF04D36}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClickerIDLE", "ClickerIDLE\ClickerIDLE.csproj", "{2D77F015-7C8F-48A1-9CA9-7CA34DD5617D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GestaoVendas", "GestaoVendas\GestaoVendas.csproj", "{B587142C-F4AD-4A1C-9B01-CF5D4A238B73}"
@@ -33,10 +31,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{DB661DB7-230C-4260-895F-7164DFF04D36}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{DB661DB7-230C-4260-895F-7164DFF04D36}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{DB661DB7-230C-4260-895F-7164DFF04D36}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{DB661DB7-230C-4260-895F-7164DFF04D36}.Release|Any CPU.Build.0 = Release|Any CPU
 		{2D77F015-7C8F-48A1-9CA9-7CA34DD5617D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{2D77F015-7C8F-48A1-9CA9-7CA34DD5617D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2D77F015-7C8F-48A1-9CA9-7CA34DD5617D}.Release|Any CPU.ActiveCfg = Release|Any CPU

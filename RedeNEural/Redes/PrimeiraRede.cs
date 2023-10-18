@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -8,6 +9,89 @@ namespace RedeNEural
 {
     public class PrimeiraRede
     {
+        private static bool existeMelhor = false;
+        private static double[,] melhorQtabel = null;
+
+        public static void Executa()
+        {
+            // Definir quantidade de episodios
+            int episodiosTreino = 50;
+
+            // Definir o tamanho da grade
+            int gridSize = 5;
+
+            // Inicializar o ambiente de grade
+            GridEnvironment gridEnv = new GridEnvironment(gridSize);
+
+            List<double[,]> qtables = new List<double[,]>();
+            for (int i = 0; i < 10; i++)
+            {
+                qtables.Add(treinarRedeNeural(gridEnv, gridSize, episodiosTreino));
+            }
+
+            List<(int, string, double[,])> values = new List<(int, string, double[,])>();
+            int count = 1;
+
+            foreach (var qtable in qtables)
+            {
+                string nome = "Agente" + count;
+                int passos = executaRedeNeural(gridEnv, qtable, nome);
+                values.Add((passos, nome, qtable));
+                count++;
+            }
+
+            values.OrderBy(x => x.Item1).ToList().ForEach(x => Console.WriteLine($"{x.Item2} finalizou em {x.Item1} passos."));
+            Console.WriteLine();
+
+            #region loop
+            //APRIMORANDO
+            melhorQtabel = values.OrderBy(x => x.Item1).FirstOrDefault().Item3;
+            existeMelhor = true;
+
+            qtables = new List<double[,]>();
+            for (int i = 0; i < 10; i++)
+            {
+                qtables.Add(treinarRedeNeural(gridEnv, gridSize, episodiosTreino));
+            }
+            values = new List<(int, string, double[,])>();
+            count = 1;
+
+            foreach (var qtable in qtables)
+            {
+                string nome = "Agente" + count;
+                int passos = executaRedeNeural(gridEnv, qtable, nome);
+                values.Add((passos, nome, qtable));
+                count++;
+            }
+
+            values.OrderBy(x => x.Item1).ToList().ForEach(x => Console.WriteLine($"{x.Item2} finalizou em {x.Item1} passos."));
+            Console.WriteLine();
+
+
+            //APRIMORANDO
+            melhorQtabel = values.OrderBy(x => x.Item1).FirstOrDefault().Item3;
+            existeMelhor = true;
+
+            qtables = new List<double[,]>();
+            for (int i = 0; i < 10; i++)
+            {
+                qtables.Add(treinarRedeNeural(gridEnv, gridSize, episodiosTreino));
+            }
+            values = new List<(int, string, double[,])>();
+            count = 1;
+
+            foreach (var qtable in qtables)
+            {
+                string nome = "Agente" + count;
+                int passos = executaRedeNeural(gridEnv, qtable, nome);
+                values.Add((passos, nome, qtable));
+                count++;
+            }
+
+            values.OrderBy(x => x.Item1).ToList().ForEach(x => Console.WriteLine($"{x.Item2} finalizou em {x.Item1} passos."));
+            #endregion
+        }
+
         public static double[,] treinarRedeNeural(GridEnvironment gridEnv, int gridSize, int numEpisodesPar)
         {
             Random random = new Random();
@@ -76,8 +160,16 @@ namespace RedeNEural
             {
                 for (int action = 0; action < 4; action++)
                 {
-                    qTable[state, action] = rand.NextDouble();
-                    //qTable[state, action] = 0;
+                    if (existeMelhor)
+                    {
+                        string passando = melhorQtabel[state,action].ToString();
+                        qTable[state,action] = double.Parse(passando);
+                    }
+                    else
+                    {
+                        qTable[state, action] = rand.NextDouble();
+                        //qTable[state, action] = 0;
+                    }
                 }
             }
         }
@@ -113,7 +205,7 @@ namespace RedeNEural
         public static int ChooseAction(double[,] qTable, int state, Random random)
         {
             var chanceExploracao = random.NextDouble();
-            if (chanceExploracao < 0.2) // Epsilon-greedy com epsilon de 0,2
+            if (chanceExploracao < 0.3) // Epsilon-greedy com epsilon de 0,2
                 return random.Next(4); // Existem 4 ações: Up -5, Right +1, Down +5, Left -1
             else
                 return ArgMax(qTable, state);

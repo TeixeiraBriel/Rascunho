@@ -43,8 +43,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Entidades\Individuo.cs" />
-    <Compile Include="Entidades\RepresentacaoAmbiente.cs" />
+    <Compile Include="Entidades\Ambiente.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
