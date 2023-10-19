@@ -184,7 +184,7 @@ namespace RedeNEural.Redes
             for (int ep = 0; ep < qtdEpisodios; ep++)
             {
                 contadorEpisodios++;
-                executaEpisodio();
+                executaEpisodio(true);
 
                 log.Add($"Inicio Geral:{horarioInicioGeral} Inicio Episodio:{horarioInicioEpisodio} Passos Tentados:{contadorPassos} Episodio:{contadorEpisodios}");
                 horarioInicioEpisodio = DateTime.Now.ToString("HH:MM:ss");
@@ -192,7 +192,7 @@ namespace RedeNEural.Redes
             }
         }
 
-        public void executaEpisodio()
+        public void executaEpisodio(bool imprimir = true)
         {
             bool sucesso = false;
             do
@@ -202,11 +202,13 @@ namespace RedeNEural.Redes
                 double reward = calculateReward();
                 sucesso = currentDistanceX == 0 && currentDistanceY == 0 ? true : false;
                 UpdateQValue(action, reward);
-                ImprimeMatrix();
+                if (imprimir)
+                {
+                    ImprimeMatrix();
+                    Thread.Sleep(timerThread);
+                }
                 contadorPassos++;
-                Thread.Sleep(timerThread);
             } while (!sucesso);
-
         }
 
         int ChooseAction()
@@ -222,19 +224,30 @@ namespace RedeNEural.Redes
             {
                 // Escolher ação com base nos valores Q
                 double bestQValue = 0;
+                bool first = true;
 
-                for (int action = 0; action < qtdActions; action++)
+                List<int> actionsValidas = getValidActions();
+                foreach (var action in actionsValidas)
                 {
                     var QValue = obtemPesoQValue(currentDistanceX, currentDistanceY, action);
 
-                    if (currentDistanceX == 0 && (action == 0 || action == 1))
+                    if (first)
                     {
-                        QValue = QValue * 0.1;
+                        first = false;
+                        bestAction = action;
+                        bestQValue = QValue;
                     }
-                    else if (currentDistanceY == 0 && (action == 2 || action == 3))
+                    else if (QValue > bestQValue)
                     {
-                        QValue = QValue * 0.1;
+                        bestAction = action;
+                        bestQValue = QValue;
                     }
+                }
+
+                /*
+                for (int action = 0; action < qtdActions; action++)
+                {
+                    var QValue = obtemPesoQValue(currentDistanceX, currentDistanceY, action);
 
                     if (action == 0)
                         bestQValue = QValue;
@@ -244,8 +257,53 @@ namespace RedeNEural.Redes
                         bestQValue = QValue;
                     }
                 }
+                */
             }
             return bestAction;
+        }
+
+        List<int> getValidActions()
+        {
+            List<int> actions = new List<int>() { 0,1,2,3};
+            List<int> actionsRemoved = new List<int>();
+
+            if (currentDistanceX == 0)
+            {
+                actions.Remove(actions.Find(x => x == 0));
+                actions.Remove(actions.Find(x => x == 1));
+                actionsRemoved.Add(0);
+                actionsRemoved.Add(1);
+            }
+
+            if (currentDistanceY == 0)
+            {
+                actions.Remove(actions.Find(x => x == 2));
+                actions.Remove(actions.Find(x => x == 3));
+                actionsRemoved.Add(2);
+                actionsRemoved.Add(3);
+            }
+
+            if (currentStateX == 0 && !actionsRemoved.Exists(x => x == 1))
+            {
+                actions.Remove(actions.Find(x => x == 1));
+            }
+
+            if(currentStateY == 0 && !actionsRemoved.Exists(x => x == 3))
+            {
+                actions.Remove(actions.Find(x => x == 3));
+            }
+
+            if (currentStateX == maxDistanceX -1 && !actionsRemoved.Exists(x => x == 0))
+            {
+                actions.Remove(actions.Find(x => x == 0));
+            }
+
+            if (currentStateY == maxDistanceX - 1 && !actionsRemoved.Exists(x => x == 2))
+            {
+                actions.Remove(actions.Find(x => x == 2));
+            }
+
+            return actions;
         }
 
         void ExecuteAction(int action)
@@ -284,11 +342,11 @@ namespace RedeNEural.Redes
             int distAtualY = calculaDistancia(1);
 
             if (distAtualX != currentDistanceX)
-                totalReward = distAtualX == 0 ? 1 : distAtualX < currentDistanceX ? 0.5 : distAtualX > currentDistanceX ? -0.3 : 0;
+                totalReward = distAtualX == 0 ? 1 : distAtualX < currentDistanceX ? 0.5 : distAtualX > currentDistanceX ? -1 : 0;
             else if (distAtualY != currentDistanceY)
-                totalReward += distAtualY == 0 ? 1 : distAtualY < currentDistanceY ? 0.5 : distAtualY > currentDistanceY ? -0.3 : 0;
+                totalReward += distAtualY == 0 ? 1 : distAtualY < currentDistanceY ? 0.5 : distAtualY > currentDistanceY ? -1 : 0;
             else
-                totalReward += -0.3;
+                totalReward += -1;
 
             if (distAtualX == 0 && distAtualY == 0)
             {
