@@ -38,7 +38,7 @@ namespace RedeNEural.Redes
             do
             {
                 rede.horarioInicioEpisodio = DateTime.Now.ToString("HH:MM:ss");
-                rede.executaTreino(100);
+                rede.executaTreino(1000);
 
                 Console.WriteLine("Sair? y/n");
                 string entrada = Console.ReadLine();
@@ -175,7 +175,7 @@ namespace RedeNEural.Redes
             taxaExploraca = 0.2;
             learningRate = 0.1;
             discountFactor = 0.7;
-            timerThread = 100;
+            timerThread = 200;
         }
 
         public void executaTreino(int _qtdEpisodios)
@@ -194,6 +194,9 @@ namespace RedeNEural.Redes
 
         public void executaEpisodio(bool imprimir = true)
         {
+            currentDistanceX = calculaDistancia(0);
+            currentDistanceY = calculaDistancia(1);
+
             bool sucesso = false;
             do
             {
@@ -243,28 +246,16 @@ namespace RedeNEural.Redes
                         bestQValue = QValue;
                     }
                 }
-
-                /*
-                for (int action = 0; action < qtdActions; action++)
-                {
-                    var QValue = obtemPesoQValue(currentDistanceX, currentDistanceY, action);
-
-                    if (action == 0)
-                        bestQValue = QValue;
-                    else if (QValue > bestQValue)
-                    {
-                        bestAction = action;
-                        bestQValue = QValue;
-                    }
-                }
-                */
             }
             return bestAction;
         }
 
         List<int> getValidActions()
         {
-            List<int> actions = new List<int>() { 0,1,2,3};
+            bool negX = calculaDistancia(0, false) < 0 ? true : false;
+            bool negY = calculaDistancia(1, false) < 0 ? true : false;
+
+            List<int> actions = new List<int>() { 0, 1, 2, 3 };
             List<int> actionsRemoved = new List<int>();
 
             if (currentDistanceX == 0)
@@ -288,21 +279,22 @@ namespace RedeNEural.Redes
                 actions.Remove(actions.Find(x => x == 1));
             }
 
-            if(currentStateY == 0 && !actionsRemoved.Exists(x => x == 3))
+            if (currentStateY == 0 && !actionsRemoved.Exists(x => x == 3))
             {
                 actions.Remove(actions.Find(x => x == 3));
             }
 
-            if (currentStateX == maxDistanceX -1 && !actionsRemoved.Exists(x => x == 0))
+            if ((currentStateX == maxDistanceX - 1 || !negX) && !actionsRemoved.Exists(x => x == 0))
             {
                 actions.Remove(actions.Find(x => x == 0));
             }
 
-            if (currentStateY == maxDistanceX - 1 && !actionsRemoved.Exists(x => x == 2))
+            if ((currentStateY == maxDistanceX - 1 || !negY) && !actionsRemoved.Exists(x => x == 2))
             {
                 actions.Remove(actions.Find(x => x == 2));
             }
 
+            //0 - Baixo     1 - Cima        2 - Direita         3 - Esquerda
             return actions;
         }
 
@@ -386,7 +378,7 @@ namespace RedeNEural.Redes
             return maxQValue;
         }
 
-        int calculaDistancia(int Type)
+        int calculaDistancia(int Type, bool positivo = true)
         {
             int distancia = 0;
 
@@ -400,7 +392,8 @@ namespace RedeNEural.Redes
                     break;
             }
 
-            distancia = distancia < 0 ? distancia * -1 : distancia;
+            if (positivo)
+                distancia = distancia < 0 ? distancia * -1 : distancia;
             return distancia;
         }
 
