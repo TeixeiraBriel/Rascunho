@@ -12,11 +12,18 @@ namespace RedeNeuralRascunho.Entidades
 
         public double Valor;
 
+        public double Bias;
+
         public List<RelacionamentoAcao> Relacionamentos { get; set; }
 
         public void UpdateRelacionamento(Entrada chamador, double modificadorSomar)
         {
             chamador.Relacionamentos.FirstOrDefault(x => x.Receptor == this).Peso += modificadorSomar;
+        }
+
+        public void funcaoAtivacao()
+        {
+
         }
     }
 }

@@ -9,19 +9,9 @@ namespace RedeNeuralRascunho.Controladores
 {
     public class Controlador
     {
-        List<Entrada> entradas = new List<Entrada>();  
-
-
-
-
 
         public Controlador() 
         {
-            entradas.Add(new Entrada() { 
-                Nome = "Direita",
-                
-            });
-
 
         }
 
