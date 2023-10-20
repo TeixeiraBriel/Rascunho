@@ -115,13 +115,15 @@ namespace RedeNEural.Redes
 
         #region Definicoes Base Agente
 
-        List<(int X, int Y, int Action, double Peso)> qTable;
+        List<(int XPos, int XNeg, int YPos, int YNeg, int Action, double Peso)> qTable;
         int qtdStatesX;
         int qtdStatesY;
         int qtdActions;
 
-        int currentDistanceX;
-        int currentDistanceY;
+        int distanciaDireita;
+        int distanciaEsquerda;
+        int distanciaBaixo;
+        int distanciaCima;
         int maxDistanceX;
         int maxDistanceY;
         int currentStateX;
@@ -132,6 +134,10 @@ namespace RedeNEural.Redes
         {
             qtdStatesX = tamanhoMatrix;
             qtdStatesY = tamanhoMatrix;
+            distanciaDireita = tamanhoMatrix - 1;
+            distanciaEsquerda = tamanhoMatrix - 1;
+            distanciaBaixo = tamanhoMatrix - 1;
+            distanciaCima = tamanhoMatrix - 1;
             maxDistanceX = tamanhoMatrix;
             maxDistanceY = tamanhoMatrix;
             qtdActions = 4;
@@ -139,15 +145,21 @@ namespace RedeNEural.Redes
 
         void InicializaQtable()
         {
-            qTable = new List<(int X, int Y, int Action, double Peso)>();
+            qTable = new List<(int XPos, int XNeg, int YPos, int YNeg, int Action, double Peso)>();
 
-            for (int x = 0; x < maxDistanceX; x++)
+            for (int direita = 0; direita < maxDistanceX; direita++)
             {
-                for (int y = 0; y < maxDistanceY; y++)
+                for (int esquerda = 0; esquerda < maxDistanceY; esquerda++)
                 {
-                    for (int action = 0; action < qtdActions; action++)
+                    for (int cima = 0; cima < maxDistanceX; cima++)
                     {
-                        qTable.Add((x, y, action, new Random().NextDouble()));
+                        for (int baixo = 0; baixo < maxDistanceY; baixo++)
+                        {
+                            for (int action = 0; action < qtdActions; action++)
+                            {
+                                qTable.Add((direita, esquerda, baixo, cima, action, new Random().NextDouble()));
+                            }
+                        }
                     }
                 }
             }
@@ -175,7 +187,8 @@ namespace RedeNEural.Redes
             taxaExploraca = 0.2;
             learningRate = 0.1;
             discountFactor = 0.7;
-            timerThread = 200;
+            timerThread = 100;
+            atualizaVariaveisDistancia();
         }
 
         public void executaTreino(int _qtdEpisodios)
@@ -184,7 +197,7 @@ namespace RedeNEural.Redes
             for (int ep = 0; ep < qtdEpisodios; ep++)
             {
                 contadorEpisodios++;
-                executaEpisodio(true);
+                executaEpisodio(true);//Assistido = true / false
 
                 log.Add($"Inicio Geral:{horarioInicioGeral} Inicio Episodio:{horarioInicioEpisodio} Passos Tentados:{contadorPassos} Episodio:{contadorEpisodios}");
                 horarioInicioEpisodio = DateTime.Now.ToString("HH:MM:ss");
@@ -194,24 +207,20 @@ namespace RedeNEural.Redes
 
         public void executaEpisodio(bool imprimir = true)
         {
-            currentDistanceX = calculaDistancia(0);
-            currentDistanceY = calculaDistancia(1);
-
-            bool sucesso = false;
             do
             {
                 int action = ChooseAction();
                 ExecuteAction(action);
                 double reward = calculateReward();
-                sucesso = currentDistanceX == 0 && currentDistanceY == 0 ? true : false;
                 UpdateQValue(action, reward);
                 if (imprimir)
                 {
                     ImprimeMatrix();
                     Thread.Sleep(timerThread);
                 }
+                atualizaVariaveisDistancia();
                 contadorPassos++;
-            } while (!sucesso);
+            } while (!validaSucessoEpisodio());
         }
 
         int ChooseAction()
@@ -229,10 +238,10 @@ namespace RedeNEural.Redes
                 double bestQValue = 0;
                 bool first = true;
 
-                List<int> actionsValidas = getValidActions();
+                List<int> actionsValidas = new List<int>() { 0, 1, 2, 3 };
                 foreach (var action in actionsValidas)
                 {
-                    var QValue = obtemPesoQValue(currentDistanceX, currentDistanceY, action);
+                    var QValue = obtemPesoQValue(distanciaDireita, distanciaEsquerda, distanciaBaixo, distanciaCima, action);
 
                     if (first)
                     {
@@ -248,54 +257,6 @@ namespace RedeNEural.Redes
                 }
             }
             return bestAction;
-        }
-
-        List<int> getValidActions()
-        {
-            bool negX = calculaDistancia(0, false) < 0 ? true : false;
-            bool negY = calculaDistancia(1, false) < 0 ? true : false;
-
-            List<int> actions = new List<int>() { 0, 1, 2, 3 };
-            List<int> actionsRemoved = new List<int>();
-
-            if (currentDistanceX == 0)
-            {
-                actions.Remove(actions.Find(x => x == 0));
-                actions.Remove(actions.Find(x => x == 1));
-                actionsRemoved.Add(0);
-                actionsRemoved.Add(1);
-            }
-
-            if (currentDistanceY == 0)
-            {
-                actions.Remove(actions.Find(x => x == 2));
-                actions.Remove(actions.Find(x => x == 3));
-                actionsRemoved.Add(2);
-                actionsRemoved.Add(3);
-            }
-
-            if (currentStateX == 0 && !actionsRemoved.Exists(x => x == 1))
-            {
-                actions.Remove(actions.Find(x => x == 1));
-            }
-
-            if (currentStateY == 0 && !actionsRemoved.Exists(x => x == 3))
-            {
-                actions.Remove(actions.Find(x => x == 3));
-            }
-
-            if ((currentStateX == maxDistanceX - 1 || !negX) && !actionsRemoved.Exists(x => x == 0))
-            {
-                actions.Remove(actions.Find(x => x == 0));
-            }
-
-            if ((currentStateY == maxDistanceX - 1 || !negY) && !actionsRemoved.Exists(x => x == 2))
-            {
-                actions.Remove(actions.Find(x => x == 2));
-            }
-
-            //0 - Baixo     1 - Cima        2 - Direita         3 - Esquerda
-            return actions;
         }
 
         void ExecuteAction(int action)
@@ -330,34 +291,33 @@ namespace RedeNEural.Redes
         {
             double totalReward = 0;
 
-            int distAtualX = calculaDistancia(0);
-            int distAtualY = calculaDistancia(1);
+            int distAtualCima = calculaDistancia(0);
+            int distAtualBaixo = calculaDistancia(1);
+            int distAtualEsquerda = calculaDistancia(2);
+            int distAtualDireita = calculaDistancia(3);
 
-            if (distAtualX != currentDistanceX)
-                totalReward = distAtualX == 0 ? 1 : distAtualX < currentDistanceX ? 0.5 : distAtualX > currentDistanceX ? -1 : 0;
-            else if (distAtualY != currentDistanceY)
-                totalReward += distAtualY == 0 ? 1 : distAtualY < currentDistanceY ? 0.5 : distAtualY > currentDistanceY ? -1 : 0;
-            else
-                totalReward += -1;
-
-            if (distAtualX == 0 && distAtualY == 0)
-            {
-                geraObjetivo();
-            }
-
-            currentDistanceX = distAtualX;
-            currentDistanceY = distAtualY;
+            totalReward += validaRetornaValorRecompensa(distAtualDireita, distanciaDireita);
+            totalReward += validaRetornaValorRecompensa(distAtualEsquerda, distanciaEsquerda);
+            totalReward += validaRetornaValorRecompensa(distAtualBaixo, distanciaBaixo);
+            totalReward += validaRetornaValorRecompensa(distAtualCima, distanciaCima);
 
             return totalReward;
         }
 
         void UpdateQValue(int action, double reward)
         {
-            var valorAtual = obtemPesoQValue(currentDistanceX, currentDistanceY, action);
-            var resultadoQtable = (1 - learningRate) * obtemPesoQValue(currentDistanceX, currentDistanceY, action) +
+            var valorAtual = obtemPesoQValue(distanciaDireita, distanciaEsquerda, distanciaBaixo, distanciaCima, action);
+            var resultadoQtable = (1 - learningRate) * obtemPesoQValue(distanciaDireita, distanciaEsquerda, distanciaBaixo, distanciaCima, action) +
                                            learningRate * (reward + discountFactor * MaxQValue());
 
-            var QvalueOut = qTable.FirstOrDefault(Qvalue => Qvalue.X == currentDistanceX && Qvalue.Y == currentDistanceY && Qvalue.Action == action);
+            var QvalueOut = qTable.FirstOrDefault(Qvalue =>
+                    Qvalue.XPos == distanciaDireita && 
+                    Qvalue.XNeg == distanciaEsquerda && 
+                    Qvalue.YPos == distanciaBaixo && 
+                    Qvalue.YNeg == distanciaCima && 
+                    Qvalue.Action == action
+                );
+
             qTable.Remove(QvalueOut);
             QvalueOut.Peso = resultadoQtable;
             qTable.Add(QvalueOut);
@@ -365,13 +325,13 @@ namespace RedeNEural.Redes
 
         double MaxQValue()
         {
-            double maxQValue = obtemPesoQValue(currentDistanceX, currentDistanceY, 0);
+            double maxQValue = obtemPesoQValue(distanciaDireita, distanciaEsquerda, distanciaBaixo, distanciaCima, 0);
 
             for (int action = 1; action < qtdActions; action++)
             {
-                if (obtemPesoQValue(currentDistanceX, currentDistanceY, action) > maxQValue)
+                if (obtemPesoQValue(distanciaDireita, distanciaEsquerda, distanciaBaixo, distanciaCima, action) > maxQValue)
                 {
-                    maxQValue = obtemPesoQValue(currentDistanceX, currentDistanceY, action);
+                    maxQValue = obtemPesoQValue(distanciaDireita, distanciaEsquerda, distanciaBaixo, distanciaCima, action);
                 }
             }
 
@@ -384,11 +344,21 @@ namespace RedeNEural.Redes
 
             switch (Type)
             {
-                case 0: //Posicao X
+                case 0: //YCima
                     distancia = currentStateX - currentObjStateX;
+                    distancia = distancia > 0 ? distancia : 0;
                     break;
-                case 1: //Posicao Y
+                case 1: //YBaixo
+                    distancia = currentStateX - currentObjStateX;
+                    distancia = distancia < 0 ? distancia * -1 : 0;
+                    break;
+                case 2: //Esquerda
                     distancia = currentStateY - currentObjStateY;
+                    distancia = distancia > 0 ? distancia : 0;
+                    break;
+                case 3: //Direta
+                    distancia = currentStateY - currentObjStateY;
+                    distancia = distancia < 0 ? distancia * -1 : 0;
                     break;
             }
 
@@ -397,9 +367,45 @@ namespace RedeNEural.Redes
             return distancia;
         }
 
-        double obtemPesoQValue(int x, int y, int action)
+        double obtemPesoQValue(int direita, int esquerda, int baixo, int cima, int action)
         {
-            return qTable.FirstOrDefault(Qvalue => Qvalue.X == x && Qvalue.Y == y && Qvalue.Action == action).Peso;
+            return qTable.FirstOrDefault(Qvalue => Qvalue.XPos == direita && Qvalue.XNeg == esquerda && Qvalue.YPos == baixo && Qvalue.YNeg == cima && Qvalue.Action == action).Peso;
+        }
+
+        double validaRetornaValorRecompensa(int valAtual, int valAnterior)
+        {
+            double totalReward = 0;
+
+            if (valAtual != valAnterior)
+                totalReward = valAtual == 0 ? 1 : valAtual < valAnterior ? 0.5 : valAtual > valAnterior ? -1 : 0;
+
+            return totalReward;
+        }
+
+        void atualizaVariaveisDistancia()
+        {
+            distanciaCima = calculaDistancia(0);
+            distanciaBaixo = calculaDistancia(1);
+            distanciaEsquerda = calculaDistancia(2);
+            distanciaDireita = calculaDistancia(3);
+        }
+
+        bool validaSucessoEpisodio()
+        {
+            bool sucesso = false;
+
+            int distAtualCima = calculaDistancia(0);
+            int distAtualBaixo = calculaDistancia(1);
+            int distAtualEsquerda = calculaDistancia(2);
+            int distAtualDireita = calculaDistancia(3);
+            sucesso = distAtualDireita == 0 && distAtualEsquerda == 0 && distAtualBaixo == 0 && distAtualCima == 0;
+
+            if (sucesso)
+            {
+                geraObjetivo();
+            }
+
+            return sucesso;
         }
         #endregion
     }

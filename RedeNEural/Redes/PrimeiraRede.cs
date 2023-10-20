@@ -42,54 +42,6 @@ namespace RedeNEural
 
             values.OrderBy(x => x.Item1).ToList().ForEach(x => Console.WriteLine($"{x.Item2} finalizou em {x.Item1} passos."));
             Console.WriteLine();
-
-            #region loop
-            //APRIMORANDO
-            melhorQtabel = values.OrderBy(x => x.Item1).FirstOrDefault().Item3;
-            existeMelhor = true;
-
-            qtables = new List<double[,]>();
-            for (int i = 0; i < 10; i++)
-            {
-                qtables.Add(treinarRedeNeural(gridEnv, gridSize, episodiosTreino));
-            }
-            values = new List<(int, string, double[,])>();
-            count = 1;
-
-            foreach (var qtable in qtables)
-            {
-                string nome = "Agente" + count;
-                int passos = executaRedeNeural(gridEnv, qtable, nome);
-                values.Add((passos, nome, qtable));
-                count++;
-            }
-
-            values.OrderBy(x => x.Item1).ToList().ForEach(x => Console.WriteLine($"{x.Item2} finalizou em {x.Item1} passos."));
-            Console.WriteLine();
-
-
-            //APRIMORANDO
-            melhorQtabel = values.OrderBy(x => x.Item1).FirstOrDefault().Item3;
-            existeMelhor = true;
-
-            qtables = new List<double[,]>();
-            for (int i = 0; i < 10; i++)
-            {
-                qtables.Add(treinarRedeNeural(gridEnv, gridSize, episodiosTreino));
-            }
-            values = new List<(int, string, double[,])>();
-            count = 1;
-
-            foreach (var qtable in qtables)
-            {
-                string nome = "Agente" + count;
-                int passos = executaRedeNeural(gridEnv, qtable, nome);
-                values.Add((passos, nome, qtable));
-                count++;
-            }
-
-            values.OrderBy(x => x.Item1).ToList().ForEach(x => Console.WriteLine($"{x.Item2} finalizou em {x.Item1} passos."));
-            #endregion
         }
 
         public static double[,] treinarRedeNeural(GridEnvironment gridEnv, int gridSize, int numEpisodesPar)
@@ -123,24 +75,6 @@ namespace RedeNEural
                     (int nextState, double reward) = gridEnv.TakeAction(action);
 
                     // Atualizar a tabela Q
-                    #region calculo ResultadoQtable quebrado
-                    /*
-                    var valorA = (1 - learningRate);
-                    var valorB = qTable[currentState, action];
-                    var valorAB = valorA * valorB;
-
-                    var valorC = learningRate;
-                    var valorD = reward;
-                    var valorE = discountFactor;
-                    var valorF = MaxQValue(qTable, nextState);
-
-                    var valorEF = valorE * valorF;
-                    var valorDEF = valorD + valorEF;
-
-                    var valorCDEF = valorC * valorDEF;
-                    var total = valorAB + valorCDEF;
-                    */
-                    #endregion
                     var resultadoQtable = (1 - learningRate) * qTable[currentState, action] +
                                                    learningRate * (reward + discountFactor * MaxQValue(qTable, nextState));
 
@@ -168,7 +102,6 @@ namespace RedeNEural
                     else
                     {
                         qTable[state, action] = rand.NextDouble();
-                        //qTable[state, action] = 0;
                     }
                 }
             }
@@ -183,21 +116,15 @@ namespace RedeNEural
             int goalState = gridEnv.GoalState;
             int passos = 0;
 
-            //Console.WriteLine($"Caminho do agente {Nome} do estado inicial ao estado objetivo:");
             int state = initialState;
 
             while (state != goalState)
             {
                 int action = ChooseAction(qtable, state, random);
-                //string acao = action == 0 ? "Up -5" : action == 1 ? "Right +1" : action == 2 ? "Down +5" : "Left -1";
-                //Console.WriteLine($"Estado: {state}, Ação: {acao}");
                 (int nextState, _) = gridEnv.TakeAction(action);
                 state = nextState;
                 passos++;
             }
-            //Console.WriteLine($"Estado: {state}, Em {passos} passos");
-            //Console.WriteLine($"Agente {Nome} Em {passos} passos");
-            //Console.WriteLine("");
 
             return passos;
         }
