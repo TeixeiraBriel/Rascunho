@@ -1,5 +1,4 @@
-﻿using BrielinaIdleRpg.Entidades;
-using BrielinaIdleRpg.Executores;
+﻿using IdleRPG.Executores;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;

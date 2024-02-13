@@ -14,13 +14,15 @@ namespace ClickerIDLE
             int contadorLoop = 0;
             do
             {
+                Console.WriteLine("VAI SAIR CLICANDO IGUAL DOIDO NA SUA TELA, CERTEZA Q VAI CONTINUAR?");
+                Console.ReadLine();
                 Console.WriteLine($"Processo iniciado - Loop N{contadorLoop}");
-                GeneticGame();
-                //IddleChamps();
+                //GeneticGame();
+                IddleChamps();
                 Console.WriteLine("Processo Pausado");
                 for (int i = 0; i < 9; i++)
                 {
-                    Console.WriteLine(i+1);
+                    Console.WriteLine(i + 1);
                     Thread.Sleep(1000);
                 }
 
@@ -32,31 +34,70 @@ namespace ClickerIDLE
 
         static void IddleChamps()
         {
-            AutoIt.AutoItX.MouseMove(-70, 220);
+            //Run
+            AutoIt.AutoItX.MouseMove(150, 930);
             AutoIt.AutoItX.MouseClick();
 
-            Thread.Sleep(1500);
-
-            var num = -1735;
-            AutoIt.AutoItX.MouseMove(num, 1050);
+            //UPS
+            AutoIt.AutoItX.MouseMove(1750, 930);
             AutoIt.AutoItX.MouseClick();
 
-            num = -1600;
-            AutoIt.AutoItX.MouseMove(num, 1050);
+            AutoIt.AutoItX.MouseMove(1380, 980);
             AutoIt.AutoItX.MouseClick();
 
-            for (int i = 0; i < 8; i++)
+            AutoIt.AutoItX.MouseMove(1380, 880);
+            AutoIt.AutoItX.MouseClick();
+
+            AutoIt.AutoItX.MouseMove(1280, 980);
+            AutoIt.AutoItX.MouseClick();
+
+            AutoIt.AutoItX.MouseMove(1870, 850);
+            AutoIt.AutoItX.MouseClick();
+
+            AutoIt.AutoItX.MouseMove(1770, 830);
+            AutoIt.AutoItX.MouseClick();
+
+            AutoIt.AutoItX.MouseMove(1850, 980);
+            AutoIt.AutoItX.MouseClick();
+            //EndUps
+
+            AutoIt.AutoItX.MouseMove(100, 1050);
+            AutoIt.AutoItX.MouseClick();
+
+            for (int i = 0; i < 530; i++)
             {
-                num += 170;
-                AutoIt.AutoItX.MouseMove(num, 1050);
                 AutoIt.AutoItX.MouseClick();
             }
 
-            AutoIt.AutoItX.MouseMove(-300, 500);
-            for (int i = 0; i < 1000; i++)
+            //Run
+            AutoIt.AutoItX.MouseMove(150, 930);
+            AutoIt.AutoItX.MouseClick();
+
+            AutoIt.AutoItX.MouseMove(100, 1050);
+
+            for (int i = 0; i < 750; i++)
             {
                 AutoIt.AutoItX.MouseClick();
             }
+
+            //Run
+            AutoIt.AutoItX.MouseMove(150, 930);
+            AutoIt.AutoItX.MouseClick();
+
+            if (false)
+            {
+                Thread.Sleep(8500);
+            }
+            else
+            {
+                AutoIt.AutoItX.MouseMove(100, 1050);
+                for (int i = 0; i < 550; i++)
+                {
+                    AutoIt.AutoItX.MouseClick();
+                }
+            }
+
+            AutoIt.AutoItX.MouseMove(500, 500);
         }
 
         static void GeneticGame()

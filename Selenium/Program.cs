@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,13 +15,40 @@ namespace Selenium
     {
         static void Main(string[] args)
         {
-            var chromeOptions = new ChromeOptions();
-            chromeOptions.AddArgument($@"user-data-dir={Environment.ExpandEnvironmentVariables("%LOCALAPPDATA%")}\Google\Chrome\User Data\");
-            chromeOptions.AddArgument("profile-directory=Default");
-            //chromeOptions.AddAdditionalOption("useAutomationExtension", false);
+            // Path para o chromedriver.exe no root do projeto
+            string chromeDriverPath = "chromedriver.exe";
 
-            IWebDriver driver = new ChromeDriver(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), chromeOptions);
-            var asd = driver.PageSource;
+            // Configuração do ChromeDriver
+            ChromeDriverService service = ChromeDriverService.CreateDefaultService();
+            service.HideCommandPromptWindow = true; // Esconder a janela de prompt de comando do ChromeDriver
+
+            // Configurações do ChromeOptions
+            ChromeOptions options = new ChromeOptions();
+            options.AddArgument("start-maximized"); // Abrir o navegador maximizado
+
+            // Inicialização do ChromeDriver
+            IWebDriver driver = new ChromeDriver(service, options);
+
+            // Exemplo de uso: carregar uma página e exibir o título
+            string url = "https://www.youtube.com/@baltaio";
+            driver.Navigate().GoToUrl(url);
+            Console.WriteLine("Título da página: " + driver.Title);
+
+            // Obtenha a URL da página
+            string currentUrl = driver.Url;
+
+            driver.Navigate().GoToUrl(url);
+
+            using (HttpClient httpClient = new HttpClient())
+            {
+                HttpResponseMessage response = httpClient.GetAsync(url).Result;
+
+                // Imprima os cabeçalhos
+                foreach (var header in response.Headers)
+                {
+                    Console.WriteLine($"{header.Key}: {string.Join(", ", header.Value)}");
+                }
+            }
         }
     }
 }

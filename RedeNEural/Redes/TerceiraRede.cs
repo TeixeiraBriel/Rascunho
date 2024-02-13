@@ -49,7 +49,7 @@ namespace RedeNEural.Redes
             TerceiraRedeClass qLearning = new TerceiraRedeClass(numStatesX, numStatesY, numActions, visionSize);
 
             // Treinar o agente
-            qLearning.Train(1000);
+            qLearning.Train(100);
             qLearning.obterValoresQ();
         }
 
@@ -62,8 +62,8 @@ namespace RedeNEural.Redes
                 {
                     for (int action = 0; action < numActions; action++)
                     {
-                        //qTable[x, y, action] = rand.NextDouble();
-                        qTable[x, y, action] = 0;
+                        qTable[x, y, action] = rand.NextDouble();
+                        //qTable[x, y, action] = 0;
                     }
                 }
             }
